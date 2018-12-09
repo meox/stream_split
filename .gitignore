@@ -22,3 +22,6 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 stream_split-*.tar
 
+tmp/*.txt
+
+.elixir_ls/

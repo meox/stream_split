@@ -1,15 +1,16 @@
 defmodule StreamSplit do
   defstruct(
     device: nil,
-    buffer: [],
-    split_token: ","
+    buffer: "",
+    split_token: ",",
+    stop: false
   )
 
   def split(file, split_token) do
     Stream.resource(
       fn ->
         {:ok, fd} = File.open(file, [:binary, :read])
-        %StreamSplit{device: fd, buffer: [], split_token: split_token}
+        %StreamSplit{device: fd, split_token: split_token}
       end,
       fn (%StreamSplit{} = state) ->
         read_next(state)
@@ -32,16 +33,25 @@ defmodule StreamSplit do
     end
   end
 
-  defp try_split(%StreamSplit{split_token: token} = state, data) do
+  defp try_split(%StreamSplit{split_token: token, stop: stop} = state, data) do
+    #IO.inspect data
     case String.split(data, token, parts: 2, trim: true) do
       [a, b] ->
         {[a], %{state | buffer: b}}
       _ ->
-        read_next(%{state | buffer: data})
+        if stop do
+          {[data], %{state | buffer: ""}}
+        else
+          read_next(%{state | buffer: data})
+        end
     end
   end
 
-  defp halt_stream(state) do
+  defp halt_stream(%StreamSplit{buffer: ""} = state) do
     {:halt, state}
+  end
+
+  defp halt_stream(%StreamSplit{buffer: buffer} = state) do
+    try_split(%{state | stop: true, buffer: ""}, buffer)
   end
 end
