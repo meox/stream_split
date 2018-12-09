@@ -10,7 +10,8 @@ defmodule StreamSplitTest do
     :ok = File.write("tmp/data.txt", "AB;CCCCC;D")
     {:ok, fd} = File.open("tmp/data.txt", [:read, :binary])
 
-    assert StreamSplit.split(fd, ";")
+    assert fd
+           |> StreamSplit.split(";")
            |> Stream.map(&String.length/1)
            |> Stream.filter(fn x -> rem(x, 2) == 1 end)
            |> Enum.count() == 2

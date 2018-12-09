@@ -20,6 +20,7 @@ defmodule StreamSplit do
     case File.open(file, [:read]) do
       {:ok, device} ->
         split(device, split_token)
+
       e ->
         e
     end
