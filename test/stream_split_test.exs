@@ -12,10 +12,10 @@ defmodule StreamSplitTest do
   end
 
   test "big stream" do
-    :ok = File.write("tmp/data2.txt", gen_doc(";;;", 10_000))
+    :ok = File.write("tmp/data2.txt", gen_doc(";;;", 13_221))
     assert StreamSplit.split("tmp/data2.txt", ";;;")
            |> Stream.map(&String.length/1)
-           |> Enum.count() == 10_000
+           |> Enum.count() == 13_221
   end
 
   defp gen_doc(sep, n) do

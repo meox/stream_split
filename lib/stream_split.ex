@@ -22,6 +22,7 @@ defmodule StreamSplit do
   end
 
   ##### PRIVATE #####
+
   defp read_next(%StreamSplit{device: fd, buffer: buffer} = state) do
     case IO.read(fd, 4096) do
       :eof ->
