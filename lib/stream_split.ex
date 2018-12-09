@@ -7,9 +7,14 @@ defmodule StreamSplit do
   )
 
   @doc """
+  Generate a stream splitting data retrieved from file.
+
+  Return a Stream.
+
   file: A string that rapresent the file path to open
   split_token: A string used to split data
   """
+  @spec split(String.t, String.t) :: Enumerable.t
   def split(file, split_token) do
     Stream.resource(
       fn ->

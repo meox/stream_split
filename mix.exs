@@ -6,8 +6,12 @@ defmodule StreamSplit.MixProject do
       app: :stream_split,
       version: "0.1.0",
       elixir: "~> 1.7",
+      build_embedded: Mix.env == :prod,
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      description: description(),
+      package: package(),
+      deps: deps(),
+      source_url: "https://github.com/meox/stream_split"
     ]
   end
 
@@ -21,9 +25,24 @@ defmodule StreamSplit.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.14", only: :dev}
+    ]
+  end
+
+  defp description() do
+    "Stream a file splitting it using a token"
+  end
+
+  defp package() do
+    [
+      # This option is only needed when you don't want to use the OTP application name
+      name: "stream_split",
+      # These are the default files included in the package
+      files: ~w(lib config .formatter.exs mix.exs README* readme* LICENSE*
+                license* CHANGELOG* changelog* src),
+      licenses: ["BSD"],
+      links: %{"GitHub" => "https://github.com/meox/stream_split"}
     ]
   end
 end
