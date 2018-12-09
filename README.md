@@ -1,6 +1,6 @@
 # StreamSplit
 
-**TODO: Add description**
+A stream split generator able to split (lazily) a file in several chunks
 
 ## Installation
 
