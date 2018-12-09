@@ -13,6 +13,7 @@ defmodule StreamSplitTest do
 
   test "big stream" do
     :ok = File.write("tmp/data2.txt", gen_doc(";;;", 13_221))
+
     assert StreamSplit.split("tmp/data2.txt", ";;;")
            |> Stream.map(&String.length/1)
            |> Enum.count() == 13_221
@@ -26,6 +27,10 @@ defmodule StreamSplitTest do
 
   defp gen_string() do
     n = Enum.random(1..31)
-    :crypto.strong_rand_bytes(n) |> Base.url_encode64 |> binary_part(0, n)
+
+    n
+    |> :crypto.strong_rand_bytes(n)
+    |> Base.url_encode64()
+    |> binary_part(0, n)
   end
 end
