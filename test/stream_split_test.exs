@@ -5,7 +5,8 @@ defmodule StreamSplitTest do
   test "basic stream" do
     :ok = File.write("tmp/data.txt", "AB;CCCCC;D")
     StreamSplit.split("tmp/data.txt", ";")
-    |> Stream.map(fn x -> IO.puts x end)
+    |> Stream.map(&String.length/1)
     |> Stream.run()
+    |> Enum.to_list()
   end
 end
