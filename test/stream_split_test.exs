@@ -29,7 +29,7 @@ defmodule StreamSplitTest do
     n = Enum.random(1..31)
 
     n
-    |> :crypto.strong_rand_bytes(n)
+    |> :crypto.strong_rand_bytes()
     |> Base.url_encode64()
     |> binary_part(0, n)
   end

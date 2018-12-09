@@ -6,10 +6,14 @@ defmodule StreamSplit do
     stop: false
   )
 
+  @doc """
+  file: A string that rapresent the file path to open
+  split_token: A string used to split data
+  """
   def split(file, split_token) do
     Stream.resource(
       fn ->
-        {:ok, fd} = File.open(file, [:binary, :read])
+        {:ok, fd} = File.open(file, [:read])
         %StreamSplit{device: fd, split_token: split_token}
       end,
       fn %StreamSplit{} = state ->
