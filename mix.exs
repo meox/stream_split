@@ -41,7 +41,7 @@ defmodule StreamSplit.MixProject do
       # This option is only needed when you don't want to use the OTP application name
       name: "file_stream_split",
       # These are the default files included in the package
-      files: ~w(lib doc test tmp config .formatter.exs mix.exs README.md),
+      files: ~w(lib doc test config .formatter.exs mix.exs README.md),
       licenses: ["BSD"],
       links: %{"GitHub" => "https://github.com/meox/stream_split"}
     ]
