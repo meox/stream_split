@@ -2,10 +2,15 @@ defmodule StreamSplitTest do
   use ExUnit.Case
   doctest StreamSplit
 
+  test "non existing file" do
+    assert StreamSplit.split("tmp/data_non_existent.txt", ";") == {:error, :enoent}
+  end
+
   test "basic stream" do
     :ok = File.write("tmp/data.txt", "AB;CCCCC;D")
+    {:ok, fd} = File.open("tmp/data.txt", [:read, :binary])
 
-    assert StreamSplit.split("tmp/data.txt", ";")
+    assert StreamSplit.split(fd, ";")
            |> Stream.map(&String.length/1)
            |> Stream.filter(fn x -> rem(x, 2) == 1 end)
            |> Enum.count() == 2

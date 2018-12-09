@@ -15,12 +15,21 @@ defmodule StreamSplit do
   - `file`: A string that rapresent the file path to open
   - `split_token`: A string used to split data
   """
-  @spec split(String.t(), String.t()) :: Enumerable.t()
-  def split(file, split_token) do
+  @spec split(String.t(), String.t()) :: Enumerable.t() | {:error, term}
+  def split(file, split_token) when is_binary(file) do
+    case File.open(file, [:read]) do
+      {:ok, device} ->
+        split(device, split_token)
+      e ->
+        e
+    end
+  end
+
+  @spec split(pid, String.t()) :: Enumerable.t()
+  def split(device, split_token) do
     Stream.resource(
       fn ->
-        {:ok, fd} = File.open(file, [:read])
-        %StreamSplit{device: fd, split_token: split_token}
+        %StreamSplit{device: device, split_token: split_token}
       end,
       fn %StreamSplit{} = state ->
         read_next(state)
