@@ -2,7 +2,11 @@ defmodule StreamSplitTest do
   use ExUnit.Case
   doctest StreamSplit
 
-  test "greets the world" do
-    assert StreamSplit.hello() == :world
+  before :all do
+    {:ok, device} = File.open("tmp/data.txt")
+  end
+
+  test "" do
+
   end
 end
