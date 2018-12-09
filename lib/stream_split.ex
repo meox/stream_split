@@ -12,7 +12,7 @@ defmodule StreamSplit do
         {:ok, fd} = File.open(file, [:binary, :read])
         %StreamSplit{device: fd, split_token: split_token}
       end,
-      fn (%StreamSplit{} = state) ->
+      fn %StreamSplit{} = state ->
         read_next(state)
       end,
       fn %StreamSplit{device: device} ->
@@ -26,18 +26,20 @@ defmodule StreamSplit do
     case IO.read(fd, 4096) do
       :eof ->
         halt_stream(state)
+
       {:error, _reason} ->
         halt_stream(state)
+
       data ->
         try_split(state, buffer <> data)
     end
   end
 
   defp try_split(%StreamSplit{split_token: token, stop: stop} = state, data) do
-    #IO.inspect data
     case String.split(data, token, parts: 2, trim: true) do
       [a, b] ->
         {[a], %{state | buffer: b}}
+
       _ ->
         if stop do
           {[data], %{state | buffer: ""}}
