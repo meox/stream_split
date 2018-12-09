@@ -14,7 +14,7 @@ defmodule StreamSplit do
   file: A string that rapresent the file path to open
   split_token: A string used to split data
   """
-  @spec split(String.t, String.t) :: Enumerable.t
+  @spec split(String.t(), String.t()) :: Enumerable.t()
   def split(file, split_token) do
     Stream.resource(
       fn ->
