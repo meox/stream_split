@@ -4,7 +4,7 @@ defmodule StreamSplit.MixProject do
   def project do
     [
       app: :file_stream_split,
-      version: "0.1.2",
+      version: "0.1.3",
       elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -41,7 +41,7 @@ defmodule StreamSplit.MixProject do
       # This option is only needed when you don't want to use the OTP application name
       name: "file_stream_split",
       # These are the default files included in the package
-      files: ~w(lib config .formatter.exs mix.exs README.md lib doc),
+      files: ~w(lib doc test tmp config .formatter.exs mix.exs README.md),
       licenses: ["BSD"],
       links: %{"GitHub" => "https://github.com/meox/stream_split"}
     ]
