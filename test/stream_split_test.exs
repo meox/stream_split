@@ -2,6 +2,14 @@ defmodule StreamSplitTest do
   use ExUnit.Case
   doctest StreamSplit
 
+  setup do
+    File.mkdir("tmp")
+
+    on_exit fn ->
+      File.rm_rf("tmp/")
+    end
+  end
+
   test "non existing file" do
     assert StreamSplit.split("tmp/data_non_existent.txt", ";") == {:error, :enoent}
   end
