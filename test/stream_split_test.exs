@@ -10,10 +10,6 @@ defmodule StreamSplitTest do
     end
   end
 
-  test "non existing file" do
-    assert StreamSplit.split("tmp/data_non_existent.txt", ";") == {:error, :enoent}
-  end
-
   test "basic stream" do
     :ok = File.write("tmp/data.txt", "AB;CCCCC;D")
     {:ok, fd} = File.open("tmp/data.txt", [:read, :binary])
@@ -26,11 +22,11 @@ defmodule StreamSplitTest do
   end
 
   test "big stream" do
-    :ok = File.write("tmp/data2.txt", gen_doc(";;;", 13_221))
-
-    assert StreamSplit.split("tmp/data2.txt", ";;;")
+    :ok = File.write("tmp/data2.txt", gen_doc(";;;", 130_221))
+    {:ok, fd} = File.open("tmp/data2.txt", [:read, :binary])
+    assert StreamSplit.split(fd, ";;;")
            |> Stream.map(&String.length/1)
-           |> Enum.count() == 13_221
+           |> Enum.count() == 130_221
   end
 
   defp gen_doc(sep, n) do

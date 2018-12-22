@@ -3,6 +3,7 @@ defmodule StreamSplit do
     device: nil,
     buffer: "",
     split_token: ",",
+    chunk_size: 4_194_304,
     stop: false
   )
 
@@ -12,25 +13,15 @@ defmodule StreamSplit do
   Return a Stream.
 
   Arguments:
-  - `file`: A string that rapresent the file path to open
+  - `file`: A that rapresent the file
   - `split_token`: A string used to split data
   """
-  @spec split(String.t(), String.t()) :: Enumerable.t() | {:error, term}
-  def split(file, split_token) when is_binary(file) do
-    case File.open(file, [:read]) do
-      {:ok, device} ->
-        split(device, split_token)
-
-      e ->
-        e
-    end
-  end
-
-  @spec split(pid, String.t()) :: Enumerable.t()
-  def split(device, split_token) do
+  @spec split(pid, String.t(), Keyword.t()) :: Enumerable.t()
+  def split(device, split_token, opts \\ []) do
     Stream.resource(
       fn ->
         %StreamSplit{device: device, split_token: split_token}
+        |> add_opts(opts)
       end,
       fn %StreamSplit{} = state ->
         read_next(state)
@@ -43,8 +34,15 @@ defmodule StreamSplit do
 
   ##### PRIVATE #####
 
-  defp read_next(%StreamSplit{device: fd, buffer: buffer} = state) do
-    case IO.read(fd, 4096) do
+  defp add_opts(%StreamSplit{} = s, []), do: s
+  defp add_opts(%StreamSplit{} = s, [{k, v} | ks]) do
+    s
+    |> Map.put(k, v)
+    |> add_opts(ks)
+  end
+
+  defp read_next(%StreamSplit{device: fd, buffer: buffer, chunk_size: size} = state) do
+    case IO.read(fd, size) do
       :eof ->
         halt_stream(state)
 
@@ -57,16 +55,15 @@ defmodule StreamSplit do
   end
 
   defp try_split(%StreamSplit{split_token: token, stop: stop} = state, data) do
-    case String.split(data, token, parts: 2, trim: true) do
-      [a, b] ->
-        {[a], %{state | buffer: b}}
-
-      _ ->
+    case String.split(data, token, trim: true) do
+      [] ->
         if stop do
           {[data], %{state | buffer: ""}}
         else
           read_next(%{state | buffer: data})
         end
+      xs ->
+          {xs, state}
     end
   end
 

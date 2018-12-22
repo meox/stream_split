@@ -25,3 +25,5 @@ stream_split-*.tar
 tmp/*.txt
 
 .elixir_ls/
+.directory
+
