@@ -5,9 +5,9 @@ defmodule StreamSplitTest do
   setup do
     File.mkdir("tmp")
 
-    on_exit fn ->
+    on_exit(fn ->
       File.rm_rf("tmp/")
-    end
+    end)
   end
 
   test "basic stream" do
@@ -21,13 +21,31 @@ defmodule StreamSplitTest do
            |> Enum.count() == 2
   end
 
+  test "stream manipulation" do
+    :ok = File.write("tmp/data_manip.txt", "AB;CCCCC;D")
+    {:ok, fd} = File.open("tmp/data_manip.txt", [:read, :binary])
+
+    assert fd
+           |> StreamSplit.split(";")
+           |> Stream.with_index()
+           |> Stream.map(fn
+             {data, 0} -> String.downcase(data)
+             {data, _} -> data
+           end)
+           |> Enum.take(3) == ["ab", "CCCCC", "D"]
+  end
+
   test "big stream" do
     :ok = File.write("tmp/data2.txt", gen_doc(";;;", 130_221))
     {:ok, fd} = File.open("tmp/data2.txt", [:read, :binary])
-    assert StreamSplit.split(fd, ";;;")
+
+    assert fd
+           |> StreamSplit.split(";;;")
            |> Stream.map(&String.length/1)
            |> Enum.count() == 130_221
   end
+
+  ##### PRIVATE #####
 
   defp gen_doc(sep, n) do
     1..n

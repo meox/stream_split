@@ -35,6 +35,7 @@ defmodule StreamSplit do
   ##### PRIVATE #####
 
   defp add_opts(%StreamSplit{} = s, []), do: s
+
   defp add_opts(%StreamSplit{} = s, [{k, v} | ks]) do
     s
     |> Map.put(k, v)
@@ -62,8 +63,9 @@ defmodule StreamSplit do
         else
           read_next(%{state | buffer: data})
         end
+
       xs ->
-          {xs, state}
+        {xs, state}
     end
   end
 
