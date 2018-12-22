@@ -32,7 +32,21 @@ defmodule StreamSplitTest do
              {data, 0} -> String.downcase(data)
              {data, _} -> data
            end)
-           |> Enum.take(3) == ["ab", "CCCCC", "D"]
+           |> Enum.to_list() == ["ab", "CCCCC", "D"]
+  end
+
+  test "stream manipulation: tagging" do
+    :ok = File.write("tmp/data_manip2.txt", "AB;CCCCC;D")
+    {:ok, fd} = File.open("tmp/data_manip2.txt", [:read, :binary])
+
+    assert fd
+           |> StreamSplit.split(";", tagging: true)
+           |> Stream.map(fn
+             {:first, data} -> String.downcase(data)
+             {:last, data} -> String.downcase(data)
+             data -> data
+           end)
+           |> Enum.to_list() == ["ab", "CCCCC", "d"]
   end
 
   test "big stream" do

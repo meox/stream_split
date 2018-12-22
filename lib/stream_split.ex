@@ -4,7 +4,8 @@ defmodule StreamSplit do
     buffer: "",
     split_token: ",",
     chunk_size: 4_194_304,
-    stop: false
+    stop: false,
+    tagging: false
   )
 
   @doc """
@@ -24,7 +25,11 @@ defmodule StreamSplit do
         |> add_opts(opts)
       end,
       fn %StreamSplit{} = state ->
-        read_next(state)
+        case read_next(state) do
+          {:halt, state} -> {:halt, state}
+          {[x | xs], state} ->
+            {[tag_first(x, state) | xs], state}
+        end
       end,
       fn %StreamSplit{device: device} ->
         File.close(device)
@@ -59,7 +64,7 @@ defmodule StreamSplit do
     case String.split(data, token, trim: true) do
       [] ->
         if stop do
-          {[data], %{state | buffer: ""}}
+          {[tag_last(data, state)], %{state | buffer: ""}}
         else
           read_next(%{state | buffer: data})
         end
@@ -76,4 +81,11 @@ defmodule StreamSplit do
   defp halt_stream(%StreamSplit{buffer: buffer} = state) do
     try_split(%{state | stop: true, buffer: ""}, buffer)
   end
+
+  defp tag_first(data, %StreamSplit{tagging: false}), do: data
+  defp tag_first(data, %StreamSplit{tagging: true}), do: {:first, data}
+
+  defp tag_last(data, %StreamSplit{tagging: false}), do: data
+  defp tag_last(data, %StreamSplit{tagging: true}), do: {:last, data}
+
 end
