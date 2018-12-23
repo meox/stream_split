@@ -5,7 +5,8 @@ defmodule StreamSplitPerfTest do
     File.mkdir("tmp_perf")
 
     on_exit(fn ->
-      #File.rm_rf("tmp_perf/")
+      nil
+      # File.rm_rf("tmp_perf/")
     end)
   end
 
@@ -14,7 +15,6 @@ defmodule StreamSplitPerfTest do
 
     fd
     |> StreamSplit.split("</doc>", tagging: true, drop_last: true)
-    |> Stream.filter(fn doc -> doc != "<doc>" end)
     |> Stream.map(fn
       {:first, data} ->
         data =
@@ -36,11 +36,14 @@ defmodule StreamSplitPerfTest do
       data ->
         "#{data}</doc>"
     end)
+    |> Stream.filter(fn doc -> doc != "<doc></doc>" end)
     |> Stream.chunk_every(1000)
     |> Stream.with_index()
     |> Stream.map(fn {docs, idx} ->
-      doc = ["<add>", docs, "</add>"]
-      |> Enum.join("")
+      doc =
+        ["<add>", docs, "</add>"]
+        |> Enum.join("")
+
       File.write("tmp_perf/t_#{idx}.xml", doc)
     end)
     |> Stream.run()

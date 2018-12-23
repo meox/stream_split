@@ -96,7 +96,10 @@ defmodule StreamSplitTest do
              {:first, data} ->
                data =
                  data
-                 |> String.replace_prefix("<?xml version=\"1.0\" encoding=\"UTF-8\"?><add><doc>", "")
+                 |> String.replace_prefix(
+                   "<?xml version=\"1.0\" encoding=\"UTF-8\"?><add><doc>",
+                   ""
+                 )
                  |> String.upcase()
 
                "<doc>#{data}</doc>"

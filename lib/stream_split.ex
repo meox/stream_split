@@ -60,7 +60,11 @@ defmodule StreamSplit do
     end
   end
 
-  defp try_split(%StreamSplit{split_token: token, buffer: buffer, stop: stop, drop_last: drop_last} = state, data) do
+  defp try_split(
+         %StreamSplit{split_token: token, buffer: buffer, stop: stop, drop_last: drop_last} =
+           state,
+         data
+       ) do
     case buffer ++ String.split(data, token, trim: true) do
       [] ->
         if stop do
@@ -78,6 +82,7 @@ defmodule StreamSplit do
         else
           {[a, tag_last(b, state)], %{state | stop: true, buffer: []}}
         end
+
       xs ->
         l = Enum.count(xs)
         {ys, buffer} = Enum.split(xs, l - 2)
@@ -96,9 +101,11 @@ defmodule StreamSplit do
   defp tag_first({:halt, _state} = input, %StreamSplit{}), do: input
   defp tag_first({_data, _state} = input, %StreamSplit{tagging: false}), do: input
   defp tag_first({_data, _state} = input, %StreamSplit{tagging: true, first: false}), do: input
+
   defp tag_first({[d | ds], state}, %StreamSplit{tagging: true, first: true}) do
     {[{:first, d} | ds], %{state | first: false}}
   end
+
   defp tag_first(input, %StreamSplit{} = _state), do: input
 
   defp tag_last(data, %StreamSplit{tagging: false}), do: data
