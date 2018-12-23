@@ -14,6 +14,7 @@ defmodule StreamSplitPerfTest do
 
     fd
     |> StreamSplit.split("</doc>", tagging: true, drop_last: true)
+    |> Stream.filter(fn doc -> doc != "<doc>" end)
     |> Stream.map(fn
       {:first, data} ->
         data =
