@@ -74,14 +74,10 @@ defmodule StreamSplit do
         end
 
       [_] ->
-        {[tag_last(data, state)], %{state | stop: true, buffer: []}}
+        read_next(state, data)
 
       [a, b] ->
-        if drop_last do
-          {[tag_last(a, state)], %{state | stop: true, buffer: []}}
-        else
-          {[a, tag_last(b, state)], %{state | stop: true, buffer: []}}
-        end
+          {[a], %{state | buffer: [b]}}
 
       xs ->
         l = Enum.count(xs)
