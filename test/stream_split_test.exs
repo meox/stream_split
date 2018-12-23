@@ -49,6 +49,20 @@ defmodule StreamSplitTest do
            |> Enum.to_list() == ["ab", "CCCCC", "d"]
   end
 
+  test "stream manipulation: tagging (with trailing)" do
+    :ok = File.write("tmp/data_manip3.txt", "AB;CCCCC;D;***")
+    {:ok, fd} = File.open("tmp/data_manip3.txt", [:read, :binary])
+
+    assert fd
+           |> StreamSplit.split(";", tagging: true, drop_last: true)
+           |> Stream.map(fn
+             {:first, data} -> String.downcase(data)
+             {:last, data} -> String.downcase(data)
+             data -> data
+           end)
+           |> Enum.to_list() == ["ab", "CCCCC", "d"]
+  end
+
   test "big stream" do
     :ok = File.write("tmp/data2.txt", gen_doc(";;;", 130_221))
     {:ok, fd} = File.open("tmp/data2.txt", [:read, :binary])
@@ -59,7 +73,6 @@ defmodule StreamSplitTest do
            |> Enum.count() == 130_221
   end
 
-  @tag :skip
   test "consistency" do
     :ok =
       File.write(
@@ -78,7 +91,7 @@ defmodule StreamSplitTest do
     {:ok, fd} = File.open("tmp/data3.txt", [:read, :binary])
 
     assert fd
-           |> StreamSplit.split("</doc>", tagging: true)
+           |> StreamSplit.split("</doc>", tagging: true, drop_last: true)
            |> Stream.map(fn
              {:first, data} ->
                data =
