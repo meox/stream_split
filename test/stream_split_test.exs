@@ -59,6 +59,50 @@ defmodule StreamSplitTest do
            |> Enum.count() == 130_221
   end
 
+  @tag :skip
+  test "consistency" do
+    :ok =
+      File.write(
+        "tmp/data3.txt",
+        [
+          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+          "<add>",
+          "<doc>aaa</doc>",
+          "<doc>bbb</doc>",
+          "<doc>ccc</doc>",
+          "</add>"
+        ]
+        |> Enum.join("")
+      )
+
+    {:ok, fd} = File.open("tmp/data3.txt", [:read, :binary])
+
+    assert fd
+           |> StreamSplit.split("</doc>", tagging: true)
+           |> Stream.map(fn
+             {:first, data} ->
+               data =
+                 data
+                 |> String.replace_prefix("<?xml version=\"1.0\" encoding=\"UTF-8\"?><add><doc>", "")
+                 |> String.upcase()
+
+               "<doc>#{data}</doc>"
+
+             {:last, data} ->
+               data =
+                 data
+                 |> String.replace_prefix("<doc>", "")
+                 |> String.replace_suffix("</add>", "")
+                 |> String.upcase()
+
+               "<doc>#{data}</doc>"
+
+             data ->
+               "#{data}</doc>"
+           end)
+           |> Enum.to_list() == ["<doc>AAA</doc>", "<doc>bbb</doc>", "<doc>CCC</doc>"]
+  end
+
   ##### PRIVATE #####
 
   defp gen_doc(sep, n) do

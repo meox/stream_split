@@ -26,7 +26,9 @@ defmodule StreamSplit do
       end,
       fn %StreamSplit{} = state ->
         case read_next(state) do
-          {:halt, state} -> {:halt, state}
+          {:halt, state} ->
+            {:halt, state}
+
           {[x | xs], state} ->
             {[tag_first(x, state) | xs], state}
         end
@@ -69,8 +71,13 @@ defmodule StreamSplit do
           read_next(%{state | buffer: data})
         end
 
+      [_] ->
+        {[data], %{state | stop: true, buffer: ""}}
+
       xs ->
-        {xs, state}
+        l = Enum.count(xs)
+        {ys, [y]} = Enum.split(xs, l - 1)
+        {ys, %{state | buffer: y}}
     end
   end
 
@@ -87,5 +94,4 @@ defmodule StreamSplit do
 
   defp tag_last(data, %StreamSplit{tagging: false}), do: data
   defp tag_last(data, %StreamSplit{tagging: true}), do: {:last, data}
-
 end
