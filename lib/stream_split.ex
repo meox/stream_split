@@ -47,7 +47,7 @@ defmodule StreamSplit do
     |> add_opts(ks)
   end
 
-  defp read_next(%StreamSplit{device: fd, chunk_size: size} = state) do
+  defp read_next(%StreamSplit{device: fd, chunk_size: size} = state, pending \\ "") do
     case IO.read(fd, size) do
       :eof ->
         halt_stream(state)
@@ -56,7 +56,7 @@ defmodule StreamSplit do
         halt_stream(state)
 
       data ->
-        try_split(state, data)
+        try_split(state, pending <> data)
     end
   end
 
@@ -66,7 +66,7 @@ defmodule StreamSplit do
         if stop do
           {[tag_last(data, state)], %{state | buffer: []}}
         else
-          read_next(%{state | buffer: data})
+          read_next(state, data)
         end
 
       [_] ->
@@ -80,7 +80,7 @@ defmodule StreamSplit do
         end
       xs ->
         l = Enum.count(xs)
-        {ys, [_a, _b] = buffer} = Enum.split(xs, l - 2)
+        {ys, buffer} = Enum.split(xs, l - 2)
         {ys, %{state | buffer: buffer}}
     end
   end
@@ -99,6 +99,7 @@ defmodule StreamSplit do
   defp tag_first({[d | ds], state}, %StreamSplit{tagging: true, first: true}) do
     {[{:first, d} | ds], %{state | first: false}}
   end
+  defp tag_first(input, %StreamSplit{} = _state), do: input
 
   defp tag_last(data, %StreamSplit{tagging: false}), do: data
   defp tag_last(data, %StreamSplit{tagging: true}), do: {:last, data}

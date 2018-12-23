@@ -26,7 +26,7 @@ defmodule StreamSplitPerfTest do
       {:last, data} ->
         data =
           data
-          |> String.replace_suffix("</add>")
+          |> String.replace_suffix("</add>", "")
           |> String.upcase()
 
         "#{data}</doc>"
@@ -35,9 +35,12 @@ defmodule StreamSplitPerfTest do
         "#{data}</doc>"
     end)
     |> Stream.chunk_every(1000)
-    |> Stream.map(fn docs ->
-      ["<add>", docs, "</add>"]
+    |> Stream.with_index()
+    |> Stream.map(fn {docs, idx} ->
+      doc = ["<add>", docs, "</add>"]
       |> Enum.join("")
+      File.write("tmp_perf/t_#{idx}.xml", doc)
     end)
+    |> Stream.run()
   end
 end

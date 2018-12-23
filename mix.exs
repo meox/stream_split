@@ -4,7 +4,7 @@ defmodule StreamSplit.MixProject do
   def project do
     [
       app: :file_stream_split,
-      version: "0.1.3",
+      version: "0.1.4",
       elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
